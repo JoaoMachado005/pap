@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adicionar Marcas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Notyf CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .btn-adicionar {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-adicionar:hover {
+      background-color: #0069d9;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+      border-color: #80bdff;
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-cancelar, .btn-salvar {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-cancelar {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-salvar {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .image-upload-container {
+      margin-top: 10px;
+      border: 2px dashed #ced4da;
+      border-radius: 5px;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+      background-color: #f8f9fa;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .image-upload-container:hover {
+      border-color: #adb5bd;
+      background-color: #e9ecef;
+    }
+
+    .image-upload-container i {
+      font-size: 40px;
+      color: #6c757d;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .image-upload-container span {
+      display: block;
+      color: #6c757d;
+    }
+
+    .file-info {
+      font-size: 14px;
+      margin-top: 5px;
+      color: #495057;
+    }
+
+    .hidden-input {
+      display: none;
+    }
+
+    .image-preview {
+      margin-top: 15px;
+      max-height: 200px;
+      overflow: hidden;
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      max-height: 200px;
+      display: block;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    .error-message {
+      color: #dc3545;
+      background-color: #f8d7da;
+      padding: 10px 15px;
+      border-left: 5px solid #dc3545;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="btnAdicionarMarca" class="btn-adicionar">
+      <i class="fas fa-plus"></i> Adicionar Marca
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalMarca" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Adicionar Nova Marca</h2>
+      <form id="formMarca">
+        <div id="erroForm" class="error-message" style="display:none;"></div>
+
+        <div class="form-group">
+          <label for="nomeMarca">Nome da Marca*</label>
+          <input type="text" id="nomeMarca" name="nomeMarca" placeholder="Ex: Nike">
+        </div>
+
+        <div class="form-group">
+          <label>Logo da Marca</label>
+          <div class="image-upload-container" id="imageUploadContainer">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Clique para selecionar uma imagem</span>
+            <span class="file-info" id="fileInfo">Nenhum arquivo selecionado</span>
+            <input type="file" id="imagemMarca" name="imagemMarca" accept="image/*" class="hidden-input">
+            <div class="image-preview" id="imagePreview">
+              <img id="previewImage" src="#" alt="Pré-visualização da imagem" style="display:none;">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancelar" id="btnCancelar">Cancelar</button>
+          <button type="submit" class="btn-salvar">Salvar Marca</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const btnAdicionar = document.getElementById('btnAdicionarMarca');
+      const modal = document.getElementById('modalMarca');
+      const spanFechar = document.querySelector('.close');
+      const form = document.getElementById('formMarca');
+      const btnCancelar = document.getElementById('btnCancelar');
+      const inputImagem = document.getElementById('imagemMarca');
+      const imageUploadContainer = document.getElementById('imageUploadContainer');
+      const previewImage = document.getElementById('previewImage');
+      const fileInfo = document.getElementById('fileInfo');
+      const nomeMarca = document.getElementById('nomeMarca');
+      const erroForm = document.getElementById('erroForm');
+  
+      const notyf = new Notyf({
+        duration: 3000,
+        position: { x: 'right', y: 'top' }
+      });
+  
+      function abrirModal() {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+  
+      function fecharModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        limparFormulario();
+      }
+  
+      function limparFormulario() {
+        form.reset();
+        previewImage.src = '';
+        previewImage.style.display = 'none';
+        fileInfo.textContent = 'Nenhum arquivo selecionado';
+        erroForm.style.display = 'none';
+      }
+  
+      function mostrarErro(mensagem) {
+        erroForm.textContent = mensagem;
+        erroForm.style.display = 'block';
+      }
+  
+      function limparErro() {
+        erroForm.style.display = 'none';
+        erroForm.textContent = '';
+      }
+  
+      btnAdicionar.onclick = abrirModal;
+      spanFechar.onclick = fecharModal;
+      btnCancelar.onclick = fecharModal;
+  
+      window.onclick = function (event) {
+        if (event.target === modal) fecharModal();
+      };
+  
+      imageUploadContainer.addEventListener('click', () => {
+        inputImagem.click();
+      });
+  
+      inputImagem.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+          fileInfo.textContent = file.name;
+        } else {
+          previewImage.src = '';
+          previewImage.style.display = 'none';
+          fileInfo.textContent = 'Nenhum arquivo selecionado';
+        }
+      });
+  
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        limparErro();
+  
+        const nome = nomeMarca.value.trim();
+        const imagem = inputImagem.files[0];
+  
+        // Validação
+        if (!nome) {
+          mostrarErro('O nome da marca é obrigatório.');
+          return;
+        }
+  
+        if (nome.length < 2) {
+          mostrarErro('O nome deve ter pelo menos 2 caracteres.');
+          return;
+        }
+  
+        const nomeRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s\-&]+$/;
+        if (!nomeRegex.test(nome)) {
+          mostrarErro('O nome contém caracteres inválidos.');
+          return;
+        }
+  
+        if (imagem) {
+          const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+          if (!tiposPermitidos.includes(imagem.type)) {
+            mostrarErro('Formato de imagem inválido. Use JPEG, PNG, GIF ou WEBP.');
+            return;
+          }
+  
+          if (imagem.size > 2 * 1024 * 1024) {
+            mostrarErro('A imagem não pode ultrapassar 2MB.');
+            return;
+          }
+        }
+  
+        // Criar FormData e enviar
+        const formData = new FormData();
+        formData.append('nomeMarca', nome);
+        if (imagem) {
+          formData.append('imagemMarca', imagem);
+        }
+  
+        try {
+          const response = await fetch('salvar_marca.php', {
+            method: 'POST',
+            body: formData
+          });
+  
+          const resultado = await response.json();
+  
+          if (response.ok && resultado.sucesso) {
+            notyf.success(resultado.mensagem || 'Marca cadastrada com sucesso!');
+            fecharModal();
+          } else {
+            mostrarErro(resultado.mensagem || 'Erro ao salvar a marca.');
+          }
+        } catch (err) {
+          mostrarErro('Erro na conexão com o servidor.');
+          console.error('Erro:', err);
+        }
+      });
+    });
+  </script>
+  
+  
+</body>
+</html>
